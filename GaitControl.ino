@@ -310,7 +310,7 @@ void loop() {
   //outputString = strTime + strc + strGait + strc + strCurvature + "\n";
   //Serial.print(millis() + strc + gait + strc + subGait + strc + gaitDirection + strc + curvatureReading + strc + legPin1[subGait][gaitDirection] + strc + legPin2[subGait][gaitDirection] + "\n");  
   //Serial.print(millis() + strc + gait + strc + subGait + strc + gaitDirection + strc + curvatureReading + "\n");
-  Serial.print(strc + curvatureReading + strc + legTimeStatus + strc + prevTimeStatus +"\n");
+  Serial.print(millis() + strc + curvatureReading + strc + legTimeStatus + strc + prevTimeStatus +"\n");
   /*
   // Transmit data over serial
   Serial.print(millis());
