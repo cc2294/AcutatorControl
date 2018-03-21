@@ -70,7 +70,7 @@ int restdelay = 300;
 
 
 /** Additional parameters by me**/
-int actuationTime = 1000; //Interrupt time in ms
+int actuationTime = 5000; //Interrupt time in ms
 int deactuationTime = 1000;
 int outputPinNum = 6; //Single output actuating pin
 int curveInput = A3;
@@ -111,6 +111,9 @@ void setup() {
   
   pinMode(13, OUTPUT);
   digitalWrite(13,LOW);
+
+  legTimeStatus = 1; // reset leg timer status  
+  prevTimeStatus = 1;
   
   for (int i = 0; i < numValves; i++) {
     pinMode(actPins[i], OUTPUT);
@@ -144,16 +147,14 @@ void loop() {
   
   // Do nothing unti something is received over serial
   if (serTrigger == 0) {
-    Serial.print("Waiting for initial gait input...");
-    Serial.print("\n");
-    while(Serial.available() == 0){}
-    serTrigger = 1; 
+    //while(Serial.available() == 0){}
+    delay(5000);
+    serTrigger  = 1; 
   }
-  
         
   // See if there's a new gait input
-  if (Serial.available() > 0) {
-    characterInput = Serial.read();
+//  if (Serial.available() > 0) {
+//    characterInput = Serial.read();
 //    switch(characterInput){
 //      case 'a':
 //        gait = 0;
@@ -199,16 +200,14 @@ void loop() {
 //    gaitDirection = floor(gait/3);
 //    subGait = gait % 3;
 //    //newGait = 1;
-    legTimeStatus = 1; // reset leg timer status  
-    prevTimeStatus = 1;
+
     
     // reset all output pins
-    digitalWrite(outputPinNum, LOW);
-    
-    for (int i = 0; i < numValves; i++) {
-       digitalWrite(actPins[i], LOW);
-    }
-  }  
+//    digitalWrite(outputPinNum, LOW);
+//    for (int i = 0; i < numValves; i++) {
+//       digitalWrite(actPins[i], LOW);
+//    }
+ // }  
   
   /*
   // Activate gait 
@@ -227,6 +226,7 @@ void loop() {
     
     // State actuating
     if (legTimeStatus == 1) {
+      //Serial.print(strc + curvatureReading + strc + 1 + "\n");
       // set first leg timer
       cli();
       legTimer = actuationTime;
@@ -243,6 +243,7 @@ void loop() {
     }
     // State deactuating
     else if (legTimeStatus == 2) {
+      //Serial.print(strc + curvatureReading + strc + 2 + "\n");
       cli();
       legTimer = deactuationTime;
       //digitalWrite(Relay[gaitDirection][leg1[subGait]], LOW);
@@ -251,7 +252,7 @@ void loop() {
       timerCount = int(legTimer/interruptTime) - 1;
       OCR1A = timerCount;
       TCNT1 = 0;
-      legTimeStatus = 3;
+      legTimeStatus = 1;
       sei();
       //digitalWrite(13, LOW);
     }
@@ -295,6 +296,9 @@ void loop() {
 //    //curvatureReading = analogRead(curvaturePins[leg2[subGait]]);
 //    curvatureReading = analogRead(analogPins2[subGait][gaitDirection]);   
 //  }
+  else if (legTimeStatus == 2) {
+    curvatureReading = analogRead(curveInput);
+  }
   else {
     pressureReading = 0;
     curvatureReading = 0;
@@ -306,7 +310,7 @@ void loop() {
   //outputString = strTime + strc + strGait + strc + strCurvature + "\n";
   //Serial.print(millis() + strc + gait + strc + subGait + strc + gaitDirection + strc + curvatureReading + strc + legPin1[subGait][gaitDirection] + strc + legPin2[subGait][gaitDirection] + "\n");  
   //Serial.print(millis() + strc + gait + strc + subGait + strc + gaitDirection + strc + curvatureReading + "\n");
-  Serial.print(millis() + strc + curvatureReading + "\n");
+  Serial.print(strc + curvatureReading + strc + legTimeStatus + strc + prevTimeStatus +"\n");
   /*
   // Transmit data over serial
   Serial.print(millis());
@@ -330,7 +334,7 @@ void loop() {
 
 ISR(TIMER1_COMPA_vect)
 {
-  if (prevTimeStatus == 4) {
+  if (prevTimeStatus == 2) {
     prevTimeStatus = 1;
   }
   else {
